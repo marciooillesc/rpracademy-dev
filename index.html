@@ -88,6 +88,11 @@
       background:linear-gradient(135deg,var(--primary),var(--primary2));
       border-color:transparent;
     }
+    .menu a.area-restrita {
+      background:linear-gradient(135deg,var(--primary),var(--primary2));
+      border-color:transparent;
+      font-weight:bold;
+    }
     .hero { padding:42px 0 22px; }
     .hero-grid {
       display:grid;
@@ -470,7 +475,8 @@
   </div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbzQJHu6IujkbP01RP9-1L8RzUI97-I_oQdAGykB9h8Q3BX1mpfmGmWyzwhquYnOSvBd/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzsfc_8wqnvHxz7T91RaPeuitgAzaoSJT4V8nIBtqKFJsaRUOV-7XDrbR00SVTiAwpW/exec';
+    const ADMIN_URL = `${API_URL}?painel=admin`;
 
     function norm(v) {
       return String(v ?? '').trim();
@@ -578,9 +584,11 @@
       const heroBtn1Link = norm(config.hero_botao_1_link) || '#muralSection';
       const heroBtn2Text = norm(config.hero_botao_2_texto) || 'Ver links';
       const heroBtn2Link = norm(config.hero_botao_2_link) || '#linksSection';
+      const areaRestritaTexto = norm(config.area_restrita_texto) || 'Área restrita';
       document.getElementById('heroActions').innerHTML = `
         <a class="btn primary" href="${escapeHtml(heroBtn1Link)}">${escapeHtml(heroBtn1Text)}</a>
         <a class="btn" href="${escapeHtml(heroBtn2Link)}">${escapeHtml(heroBtn2Text)}</a>
+        <a class="btn" href="${escapeHtml(ADMIN_URL)}" target="_blank" rel="noopener noreferrer">${escapeHtml(areaRestritaTexto)}</a>
       `;
 
       const topMenu = document.getElementById('topMenu');
@@ -590,7 +598,7 @@
           const ancora = norm(item.link) || '#inicio';
           const nome = norm(item.nome_menu) || 'Menu';
           return `<a href="${escapeHtml(ancora)}">${escapeHtml(nome)}</a>`;
-        }).join('');
+        }).join('') + `<a class="area-restrita" href="${escapeHtml(ADMIN_URL)}" target="_blank" rel="noopener noreferrer">Área restrita</a>`;
 
       document.getElementById('destaquesSection').style.display = isSim(config.mostrar_destaques) ? 'block' : 'none';
       document.getElementById('muralSection').style.display = isSim(config.mostrar_mural) ? 'block' : 'none';
