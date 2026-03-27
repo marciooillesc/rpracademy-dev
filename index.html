@@ -76,6 +76,7 @@
       display:flex;
       flex-wrap:wrap;
       gap:10px;
+      align-items:center;
     }
     .menu a {
       padding:10px 14px;
@@ -87,6 +88,20 @@
     .menu a.active {
       background:linear-gradient(135deg,var(--primary),var(--primary2));
       border-color:transparent;
+    }
+    /* Botão admin discreto no menu */
+    .btn-admin {
+      padding:10px 14px;
+      border-radius:999px;
+      border:1px solid rgba(251,191,36,.3);
+      background:rgba(251,191,36,.08);
+      font-size:13px;
+      color:#fde68a;
+      cursor:pointer;
+      text-decoration:none;
+    }
+    .btn-admin:hover {
+      background:rgba(251,191,36,.16);
     }
     .hero { padding:42px 0 22px; }
     .hero-grid {
@@ -396,7 +411,10 @@
             <p id="brandSubtitle"></p>
           </div>
         </a>
-        <nav class="menu" id="topMenu"></nav>
+        <nav class="menu" id="topMenu">
+          <!-- itens do menu da planilha são inseridos aqui -->
+          <!-- botão admin é adicionado via JS ao final -->
+        </nav>
       </div>
     </header>
 
@@ -470,7 +488,11 @@
   </div>
 
   <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbzQJHu6IujkbP01RP9-1L8RzUI97-I_oQdAGykB9h8Q3BX1mpfmGmWyzwhquYnOSvBd/exec';
+    // ✅ URL da API pública (Projeto 1 — code.gs)
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyjWALebfzJTxT1KlLtCEr9y-B-oMeBXBOCasshRF3j4NDb6ct98sAuZN6y_cozZyR_4Q/exec';
+
+    // ✅ URL do painel admin (Projeto 2 — code_admin.gs)
+    const ADMIN_URL = 'https://script.google.com/macros/s/AKfycbxeMFW3kxDbGWoMX1rA3j2UA_5kC4hhd3P7iJbUvF3poxiujiuibtwxOCjHfmQySX6dGg/exec?painel=admin';
 
     function norm(v) {
       return String(v ?? '').trim();
@@ -603,14 +625,22 @@
         <a class="btn" href="${escapeHtml(heroBtn2Link)}">${escapeHtml(heroBtn2Text)}</a>
       `);
 
+      // Monta menu da planilha + botão admin ao final
       const topMenu = document.getElementById('topMenu');
-      if (topMenu) topMenu.innerHTML = menu
-        .filter(item => isSim(item.ativo))
-        .map(item => {
-          const ancora = norm(item.link) || '#inicio';
-          const nome = norm(item.nome_menu) || 'Menu';
-          return `<a href="${escapeHtml(ancora)}">${escapeHtml(nome)}</a>`;
-        }).join('');
+      if (topMenu) {
+        const itensMenu = menu
+          .filter(item => isSim(item.ativo))
+          .map(item => {
+            const ancora = norm(item.link) || '#inicio';
+            const nome = norm(item.nome_menu) || 'Menu';
+            return `<a href="${escapeHtml(ancora)}">${escapeHtml(nome)}</a>`;
+          }).join('');
+
+        // ✅ Botão admin adicionado ao final do menu
+        const btnAdmin = `<a class="btn-admin" href="${escapeHtml(ADMIN_URL)}" target="_blank" rel="noopener noreferrer">⚙ Admin</a>`;
+
+        topMenu.innerHTML = itensMenu + btnAdmin;
+      }
 
       setDisplay('destaquesSection', isSim(config.mostrar_destaques) ? 'block' : 'none');
       setDisplay('muralSection', isSim(config.mostrar_mural) ? 'block' : 'none');
