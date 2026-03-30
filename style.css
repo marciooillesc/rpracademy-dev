@@ -1241,6 +1241,12 @@ body {
   .btn--hero { min-width: 160px; padding: 1.2rem 1.4rem; }
 
   .grid-2 { grid-template-columns: 1fr; }
+
+  /* Título da tela inicial: permite quebra de linha no mobile */
+  .tela-inicial__titulo {
+    white-space: normal;
+    font-size: 2rem;
+  }
 }
 
 /* (bloco anterior de 560px removido — substituído pelo sistema mobile abaixo) */

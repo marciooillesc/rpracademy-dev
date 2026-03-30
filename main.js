@@ -88,21 +88,30 @@ function _ativarModo(modo) {
 function _voltarInicio() {
   setEstado({ modo: null, tela: 'inicial', sidebarAtiva: null });
 
-  // Esconde o app completamente (display:none para não sobrepor a tela inicial)
-  elApp.style.display = 'none';
-  elApp.classList.add('app--oculto');
+  // 1) Fade-out suave do app (0.35s), depois troca as telas
+  elApp.style.opacity = '0';
+  elApp.style.transition = 'opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1)';
 
-  // Reexibe a tela inicial com animação de entrada
-  elTelaInicial.style.display = '';
-  elTelaInicial.classList.remove('saindo');
-  elRodape.style.left = '0';
+  setTimeout(() => {
+    // 2) Esconde o app após o fade terminar
+    elApp.style.display = 'none';
+    elApp.style.opacity = '';
+    elApp.style.transition = '';
+    elApp.classList.add('app--oculto');
 
-  // Força reflow para reativar a animação CSS
-  elTelaInicial.style.animation = 'none';
-  elTelaInicial.querySelector('.tela-inicial__content').style.animation = 'none';
-  elTelaInicial.offsetHeight; // trigger reflow
-  elTelaInicial.style.animation = '';
-  elTelaInicial.querySelector('.tela-inicial__content').style.animation = '';
+    elRodape.style.left = '0';
+
+    // 3) Reexibe a tela inicial com animação de entrada
+    elTelaInicial.style.display = '';
+    elTelaInicial.classList.remove('saindo');
+
+    // Força reflow para reativar a animação CSS
+    elTelaInicial.style.animation = 'none';
+    elTelaInicial.querySelector('.tela-inicial__content').style.animation = 'none';
+    elTelaInicial.offsetHeight; // trigger reflow
+    elTelaInicial.style.animation = '';
+    elTelaInicial.querySelector('.tela-inicial__content').style.animation = '';
+  }, 350);
 }
 
 // ── SIDEBAR ────────────────────────────────────────────────────────────────────
