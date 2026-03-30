@@ -7,7 +7,7 @@ export const META = {
   id: 'digitacao',
   nome: 'Velocidade de Digitação',
   descricao: 'Teste sua velocidade no teclado',
-  emoji: '⌨️',
+  emoji: '',
 };
 
 const FRASES = [
@@ -52,7 +52,7 @@ export function render(container) {
   container.innerHTML = `
     <div class="jogo-area">
       <div class="page-header">
-        <span class="page-header__eyebrow">⌨️ Jogo</span>
+        <span class="page-header__eyebrow">Jogo</span>
         <h1 class="page-header__titulo">Velocidade de Digitação</h1>
         <p class="page-header__desc">Digite o texto abaixo o mais rápido possível. Boa sorte!</p>
       </div>
@@ -203,8 +203,11 @@ export function init(container) {
   btnIniciar?.addEventListener('click', iniciar);
   btnReiniciar?.addEventListener('click', iniciar);
 
-  // Adiciona estilo de cursor piscante
-  const style = document.createElement('style');
-  style.textContent = `@keyframes blink { 50% { opacity: 0 } }`;
-  document.head.appendChild(style);
+  // Adiciona estilo de cursor piscante apenas se ainda não existir
+  if (!document.getElementById('digitacao-blink-style')) {
+    const style = document.createElement('style');
+    style.id = 'digitacao-blink-style';
+    style.textContent = `@keyframes blink { 50% { opacity: 0 } }`;
+    document.head.appendChild(style);
+  }
 }

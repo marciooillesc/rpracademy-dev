@@ -10,7 +10,7 @@ const NIVEIS = [
   {
     id: 'infantil',
     nome: 'Infantil',
-    emoji: '🐣',
+    emoji: '',
     cor: '#34d399',
     descricao: 'Palavras simples e curtas',
     grid: 8,
@@ -138,273 +138,9 @@ function _renderTelaInicio(container) {
   `).join('');
 
   container.innerHTML = `
-    <style>
-      .cp-wrap { max-width: 860px; }
-      .cp-titulo {
-        font-family: var(--font-display);
-        font-size: 2rem;
-        font-weight: 800;
-        color: var(--text);
-        margin-bottom: 0.4rem;
-        letter-spacing: -0.02em;
-      }
-      .cp-sub {
-        color: var(--text-2);
-        font-size: 0.9rem;
-        margin-bottom: 2rem;
-      }
-      .cp-niveis-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 0.85rem;
-      }
-      .cp-nivel-card {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 6px;
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
-        padding: 1.4rem 1rem;
-        cursor: pointer;
-        transition: var(--transition);
-        font-family: var(--font-body);
-        text-align: center;
-        position: relative;
-        overflow: hidden;
-      }
-      .cp-nivel-card::before {
-        content: '';
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(135deg, color-mix(in srgb, var(--nivel-cor) 15%, transparent), transparent 60%);
-        opacity: 0;
-        transition: var(--transition);
-      }
-      .cp-nivel-card:hover::before { opacity: 1; }
-      .cp-nivel-card:hover {
-        border-color: var(--nivel-cor);
-        transform: translateY(-4px);
-        box-shadow: 0 8px 24px color-mix(in srgb, var(--nivel-cor) 20%, transparent);
-      }
-      .cp-nivel-emoji { font-size: 2rem; }
-      .cp-nivel-nome {
-        font-family: var(--font-display);
-        font-weight: 700;
-        font-size: 0.95rem;
-        color: var(--nivel-cor);
-      }
-      .cp-nivel-desc {
-        font-size: 0.72rem;
-        color: var(--text-3);
-      }
-      .cp-nivel-info {
-        display: flex;
-        gap: 6px;
-        margin-top: 4px;
-        flex-wrap: wrap;
-        justify-content: center;
-      }
-      .cp-nivel-info span {
-        font-family: var(--font-mono);
-        font-size: 0.62rem;
-        color: var(--text-3);
-        background: var(--bg-2);
-        border: 1px solid var(--border);
-        border-radius: 20px;
-        padding: 1px 7px;
-      }
-
-      /* ── TELA DE JOGO ── */
-      .cp-jogo-wrap {
-        display: grid;
-        grid-template-columns: 1fr auto;
-        gap: 1.5rem;
-        align-items: start;
-      }
-      @media (max-width: 700px) {
-        .cp-jogo-wrap { grid-template-columns: 1fr; }
-      }
-      .cp-toolbar {
-        display: flex;
-        align-items: center;
-        gap: 0.75rem;
-        margin-bottom: 1.25rem;
-        flex-wrap: wrap;
-      }
-      .cp-toolbar-titulo {
-        font-family: var(--font-display);
-        font-weight: 800;
-        font-size: 1.3rem;
-        color: var(--text);
-        flex: 1;
-      }
-      .cp-stat {
-        font-family: var(--font-mono);
-        font-size: 0.78rem;
-        color: var(--text-2);
-        background: var(--bg-2);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-sm);
-        padding: 0.3rem 0.75rem;
-      }
-      .cp-stat strong { color: var(--primary); }
-
-      /* ── GRID ── */
-      .cp-grid-outer {
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-lg);
-        padding: 1rem;
-        user-select: none;
-        -webkit-user-select: none;
-        touch-action: none;
-      }
-      .cp-grid {
-        display: grid;
-        gap: 2px;
-      }
-      .cp-celula {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 5px;
-        font-family: var(--font-display);
-        font-weight: 700;
-        cursor: pointer;
-        transition: background 0.08s, color 0.08s, transform 0.08s;
-        border: 1px solid transparent;
-        font-size: 0.85rem;
-        color: var(--text-2);
-        background: var(--bg-2);
-      }
-      .cp-celula:hover { background: var(--primary-dim); color: var(--primary); }
-      .cp-celula.selecionada {
-        background: var(--primary-dim);
-        border-color: var(--primary);
-        color: var(--primary);
-        transform: scale(1.05);
-      }
-      .cp-celula.encontrada {
-        background: rgba(52,211,153,0.15) !important;
-        border-color: rgba(52,211,153,0.3) !important;
-        color: var(--success) !important;
-        transform: none !important;
-      }
-      .cp-celula.acerto-flash {
-        animation: cpFlash 0.4s ease;
-      }
-      @keyframes cpFlash {
-        0%   { background: rgba(52,211,153,0.5); transform: scale(1.15); }
-        100% { background: rgba(52,211,153,0.15); transform: none; }
-      }
-
-      /* ── PAINEL LATERAL ── */
-      .cp-painel {
-        min-width: 180px;
-        max-width: 220px;
-      }
-      @media (max-width: 700px) {
-        .cp-painel { max-width: 100%; }
-      }
-      .cp-painel-titulo {
-        font-family: var(--font-mono);
-        font-size: 0.65rem;
-        color: var(--text-3);
-        text-transform: uppercase;
-        letter-spacing: 0.12em;
-        margin-bottom: 0.6rem;
-      }
-      .cp-lista-palavras {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-      }
-      @media (max-width: 700px) {
-        .cp-lista-palavras {
-          flex-direction: row;
-          flex-wrap: wrap;
-        }
-      }
-      .cp-palavra-item {
-        font-family: var(--font-mono);
-        font-size: 0.78rem;
-        color: var(--text-2);
-        padding: 5px 10px;
-        border-radius: 6px;
-        background: var(--bg-2);
-        border: 1px solid var(--border);
-        transition: var(--transition);
-        letter-spacing: 0.05em;
-      }
-      .cp-palavra-item.achada {
-        color: var(--success);
-        background: rgba(52,211,153,0.1);
-        border-color: rgba(52,211,153,0.2);
-        text-decoration: line-through;
-        opacity: 0.7;
-      }
-
-      /* ── VITÓRIA ── */
-      .cp-vitoria {
-        text-align: center;
-        padding: 3rem 2rem;
-        max-width: 480px;
-        margin: 0 auto;
-      }
-      .cp-vitoria-emoji {
-        font-size: 4rem;
-        display: block;
-        margin-bottom: 1rem;
-        animation: cpBounce 0.6s ease;
-      }
-      @keyframes cpBounce {
-        0%   { transform: scale(0); }
-        60%  { transform: scale(1.2); }
-        100% { transform: scale(1); }
-      }
-      .cp-vitoria-titulo {
-        font-family: var(--font-display);
-        font-size: 2.2rem;
-        font-weight: 800;
-        color: var(--success);
-        margin-bottom: 0.5rem;
-      }
-      .cp-vitoria-stats {
-        display: flex;
-        gap: 1rem;
-        justify-content: center;
-        margin: 1.5rem 0 2rem;
-        flex-wrap: wrap;
-      }
-      .cp-vitoria-stat {
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: var(--radius);
-        padding: 0.75rem 1.25rem;
-        text-align: center;
-      }
-      .cp-vitoria-stat-valor {
-        font-family: var(--font-display);
-        font-size: 1.5rem;
-        font-weight: 800;
-        color: var(--primary);
-        display: block;
-      }
-      .cp-vitoria-stat-label {
-        font-size: 0.72rem;
-        color: var(--text-3);
-        font-family: var(--font-mono);
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-      }
-      .cp-vitoria-btns { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
-    </style>
-
     <div class="cp-wrap">
       <div class="page-header">
-        <span class="page-header__eyebrow">🔤 Jogo</span>
+        <span class="page-header__eyebrow">Jogo</span>
         <h1 class="cp-titulo">Caça-Palavras</h1>
         <p class="cp-sub">Escolha o nível de dificuldade para começar.</p>
       </div>
@@ -491,8 +227,8 @@ function _renderTelaJogo(container) {
       </div>
       <div class="cp-stat">⏱️ <strong id="cp-tempo">00:00</strong></div>
       <div class="cp-stat">✅ <strong id="cp-encontradas">0</strong>/${total}</div>
-      <button class="btn btn--ghost btn--sm" id="cp-btn-niveis">← Níveis</button>
-      <button class="btn btn--ghost btn--sm" id="cp-btn-novo">🔄 Novo</button>
+      <button class="btn btn--ghost btn--sm" id="cp-btn-niveis">Níveis</button>
+      <button class="btn btn--ghost btn--sm" id="cp-btn-novo">Novo</button>
     </div>
 
     <div class="cp-jogo-wrap">
@@ -744,8 +480,8 @@ function _renderVitoria(container) {
         </div>
       </div>
       <div class="cp-vitoria-btns">
-        <button class="btn btn--primary" id="cp-btn-repetir">🔄 Jogar Novamente</button>
-        <button class="btn btn--ghost" id="cp-btn-proximo">⬆️ Próximo Nível</button>
+        <button class="btn btn--primary" id="cp-btn-repetir">Jogar Novamente</button>
+        <button class="btn btn--ghost" id="cp-btn-proximo">Próximo Nível</button>
         <button class="btn btn--ghost" id="cp-btn-menu">← Níveis</button>
       </div>
     </div>

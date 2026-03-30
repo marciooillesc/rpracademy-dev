@@ -1,22 +1,32 @@
 /**
  * features/academico/alunos.js
- * Área dos alunos: identificação por nome+turma, listagem por turma,
- * simulados com salvamento de resultado na planilha.
+ * Área dos alunos: identificação por nome + turma (nível + letra),
+ * listagem filtrada por turma e simulados com salvamento de resultado.
  */
 
-import { buscarConteudos, filtrarPorTurma, filtrarPorTipo, listarTurmas } from '../../modules/api.js';
-import { getEstado, setEstado } from '../../modules/state.js';
+import { buscarConteudos, filtrarPorTurma, filtrarPorTipo } from '../../modules/api.js';
 import { renderizar, htmlLoading, htmlErro, htmlVazio, htmlBadgeTipo, formatarData, htmlDetalheConteudo, inicializarSimulado } from '../../modules/ui.js';
 
+// ── CONSTANTES ────────────────────────────────────────────────────────────────
+
+const NIVEIS = [
+  { label: 'Ensino Infantil',       turmas: ['Infantil I', 'Infantil II', 'Infantil III'] },
+  { label: 'Ensino Fundamental I',  turmas: ['1º Ano', '2º Ano', '3º Ano', '4º Ano', '5º Ano'] },
+  { label: 'Ensino Fundamental II', turmas: ['6º Ano', '7º Ano', '8º Ano', '9º Ano'] },
+  { label: 'Ensino Médio',          turmas: ['1ª Série', '2ª Série', '3ª Série'] },
+];
+
+const LETRAS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+
 // ── ESTADO LOCAL ──────────────────────────────────────────────────────────────
-let _todos = [];
-let _aluno = { nome: '', turma: '' };
+
+let _todos     = [];
+let _aluno     = { nome: '', turma: '' };
 let _filtroTipo = '';
 
 // ── ENTRY POINT ───────────────────────────────────────────────────────────────
 
 export function renderAlunos(container) {
-  // Restaura sessão salva no navegador
   const salvo = _carregarSessao();
   if (salvo) {
     _aluno = salvo;
@@ -28,89 +38,99 @@ export function renderAlunos(container) {
 
 // ── TELA DE IDENTIFICAÇÃO ─────────────────────────────────────────────────────
 
-async function _renderIdentificacao(container) {
-  renderizar(container, htmlLoading('Carregando turmas...'));
+function _renderIdentificacao(container) {
+  const niveisOpts = NIVEIS.map(n =>
+    `<optgroup label="${n.label}">${n.turmas.map(t => `<option value="${t}">${t}</option>`).join('')}</optgroup>`
+  ).join('');
 
-  try {
-    _todos = await buscarConteudos();
-    const turmas = listarTurmas(_todos);
+  const letrasOpts = `<option value="">Selecione...</option>` +
+    LETRAS.map(l => `<option value="${l}">${l}</option>`).join('');
 
-    const turmaOpts = turmas.map(t =>
-      `<option value="${t}">${t}</option>`
-    ).join('');
+  renderizar(container, `
+    <div style="max-width:440px;margin:0 auto;padding-top:2rem">
+      <div class="page-header" style="text-align:center">
+        <span class="page-header__eyebrow">Alunos</span>
+        <h1 class="page-header__titulo">Olá! Quem é você?</h1>
+        <p class="page-header__desc">Informe seus dados para acessar os conteúdos da sua turma.</p>
+      </div>
 
-    renderizar(container, `
-      <div style="max-width:420px; margin:0 auto; padding-top:2rem">
-        <div class="page-header" style="text-align:center">
-          <span class="page-header__eyebrow">🎒 Alunos</span>
-          <h1 class="page-header__titulo">Olá! Quem é você?</h1>
-          <p class="page-header__desc">Informe seu nome e turma para acessar os conteúdos.</p>
-        </div>
+      <div class="card card--destaque" style="margin-top:1.5rem">
+        <div style="display:flex;flex-direction:column;gap:1rem">
 
-        <div class="card card--destaque" style="margin-top:1.5rem">
-          <div style="display:flex;flex-direction:column;gap:1rem">
-            <div>
-              <label style="font-size:0.78rem;color:var(--text-3);font-family:var(--font-mono);letter-spacing:0.08em;display:block;margin-bottom:6px">
-                SEU NOME
-              </label>
-              <input
-                id="aluno-nome"
-                type="text"
-                class="input-custom"
-                placeholder="Digite seu nome completo"
-                autocomplete="name"
-              />
-            </div>
-            <div>
-              <label style="font-size:0.78rem;color:var(--text-3);font-family:var(--font-mono);letter-spacing:0.08em;display:block;margin-bottom:6px">
-                SUA TURMA
-              </label>
-              <select id="aluno-turma" class="select-custom" style="width:100%">
-                <option value="">Selecione a turma...</option>
-                ${turmaOpts}
-              </select>
-            </div>
-            <button class="btn btn--primary" id="btn-entrar-aluno" style="width:100%;justify-content:center;padding:0.75rem">
-              Acessar meus conteúdos →
-            </button>
-            <p id="aluno-erro" style="color:var(--danger);font-size:0.82rem;text-align:center;display:none">
-              Preencha seu nome e selecione a turma.
-            </p>
+          <!-- Nome -->
+          <div>
+            <label style="font-size:0.78rem;color:var(--text-3);font-family:var(--font-mono);letter-spacing:0.08em;display:block;margin-bottom:6px">
+              SEU NOME <span style="color:var(--danger)">*</span>
+            </label>
+            <input id="aluno-nome" type="text" class="input-custom"
+              placeholder="Digite seu nome completo" autocomplete="name" />
           </div>
+
+          <!-- Nível -->
+          <div>
+            <label style="font-size:0.78rem;color:var(--text-3);font-family:var(--font-mono);letter-spacing:0.08em;display:block;margin-bottom:6px">
+              ANO / SÉRIE <span style="color:var(--danger)">*</span>
+            </label>
+            <select id="aluno-nivel" class="select-custom" style="width:100%">
+              <option value="">Selecione o seu ano...</option>
+              ${niveisOpts}
+            </select>
+          </div>
+
+          <!-- Letra da turma -->
+          <div id="aluno-letra-wrap">
+            <label style="font-size:0.78rem;color:var(--text-3);font-family:var(--font-mono);letter-spacing:0.08em;display:block;margin-bottom:6px">
+              TURMA (LETRA) <span style="color:var(--danger)">*</span>
+            </label>
+            <select id="aluno-letra" class="select-custom" style="width:100%">
+              ${letrasOpts}
+            </select>
+          </div>
+
+          <button class="btn btn--primary" id="btn-entrar-aluno"
+            style="width:100%;justify-content:center;padding:0.75rem">
+            Acessar meus conteúdos →
+          </button>
+
+          <p id="aluno-erro" style="color:var(--danger);font-size:0.82rem;text-align:center;display:none">
+            Preencha todos os campos obrigatórios.
+          </p>
         </div>
       </div>
-    `);
+    </div>
+  `);
 
-    container.querySelector('#btn-entrar-aluno')?.addEventListener('click', () => {
-      const nome  = container.querySelector('#aluno-nome').value.trim();
-      const turma = container.querySelector('#aluno-turma').value;
-      const erro  = container.querySelector('#aluno-erro');
+  // Nível muda → mostra/oculta campo letra
+  container.querySelector('#aluno-nivel')?.addEventListener('change', () => {
+    // sempre mostra a letra (não há "Todas as turmas" para aluno)
+  });
 
-      if (!nome || !turma) {
-        erro.style.display = '';
-        return;
-      }
+  container.querySelector('#btn-entrar-aluno')?.addEventListener('click', () => {
+    const nome  = container.querySelector('#aluno-nome').value.trim();
+    const nivel = container.querySelector('#aluno-nivel').value;
+    const letra = container.querySelector('#aluno-letra').value;
+    const erro  = container.querySelector('#aluno-erro');
 
-      _aluno = { nome, turma };
-      _salvarSessao(_aluno);
-      _renderAreaAluno(container);
-    });
+    if (!nome || !nivel || !letra) {
+      erro.style.display = '';
+      return;
+    }
 
-    // Enter no campo nome avança para turma
-    container.querySelector('#aluno-nome')?.addEventListener('keydown', e => {
-      if (e.key === 'Enter') container.querySelector('#aluno-turma')?.focus();
-    });
+    const turma = `${nivel} - Turma ${letra}`;
+    _aluno = { nome, turma };
+    _salvarSessao(_aluno);
+    _renderAreaAluno(container);
+  });
 
-  } catch (err) {
-    renderizar(container, htmlErro(err.message));
-  }
+  container.querySelector('#aluno-nome')?.addEventListener('keydown', e => {
+    if (e.key === 'Enter') container.querySelector('#aluno-nivel')?.focus();
+  });
 }
 
 // ── ÁREA PRINCIPAL DO ALUNO ───────────────────────────────────────────────────
 
 async function _renderAreaAluno(container) {
   renderizar(container, htmlLoading('Carregando conteúdos...'));
-
   try {
     _todos = await buscarConteudos();
     _filtroTipo = '';
@@ -126,12 +146,12 @@ function _renderListagem(container) {
     ? filtrarPorTipo(conteudosDaTurma, _filtroTipo)
     : conteudosDaTurma;
 
-  const tipos = ['', 'simulado', 'atividade', 'conteudo', 'material'];
+  const tipos  = ['', 'simulado', 'atividade', 'conteudo', 'material'];
   const labels = { '': 'Todos', simulado: 'Simulados', atividade: 'Atividades', conteudo: 'Conteúdos', material: 'Materiais' };
 
-  const chipsHTML = tipos.map(t => `
-    <span class="chip ${_filtroTipo === t ? 'ativo' : ''}" data-tipo="${t}">${labels[t]}</span>
-  `).join('');
+  const chipsHTML = tipos.map(t =>
+    `<span class="chip ${_filtroTipo === t ? 'ativo' : ''}" data-tipo="${t}">${labels[t]}</span>`
+  ).join('');
 
   const listaHTML = filtrados.length > 0
     ? filtrados.map((item, idx) => `
@@ -157,7 +177,7 @@ function _renderListagem(container) {
       <div class="page-header">
         <span class="page-header__eyebrow">🎒 Alunos</span>
         <h1 class="page-header__titulo">Olá, ${_aluno.nome.split(' ')[0]}!</h1>
-        <p class="page-header__desc">Conteúdos publicados para a turma <strong style="color:var(--primary)">${_aluno.turma}</strong>.</p>
+        <p class="page-header__desc">Conteúdos da turma <strong style="color:var(--primary)">${_aluno.turma}</strong>.</p>
       </div>
 
       <div style="display:flex;align-items:center;gap:0.75rem;margin-bottom:1.5rem;flex-wrap:wrap">
@@ -170,7 +190,6 @@ function _renderListagem(container) {
     </div>
   `);
 
-  // Chips de filtro
   container.querySelector('#chips-tipo-aluno')?.addEventListener('click', e => {
     const chip = e.target.closest('[data-tipo]');
     if (!chip) return;
@@ -178,21 +197,18 @@ function _renderListagem(container) {
     _renderListagem(container);
   });
 
-  // Trocar aluno
   container.querySelector('#btn-trocar-aluno')?.addEventListener('click', () => {
     _limparSessao();
     _aluno = { nome: '', turma: '' };
     _renderIdentificacao(container);
   });
 
-  // Recarregar
   container.querySelector('#btn-recarregar-aluno')?.addEventListener('click', async () => {
     const { limparCache } = await import('../../modules/api.js');
     limparCache();
     _renderAreaAluno(container);
   });
 
-  // Clique num item
   container.querySelector('#lista-aluno')?.addEventListener('click', e => {
     const item = e.target.closest('.conteudo-item');
     if (!item) return;
@@ -204,27 +220,19 @@ function _renderListagem(container) {
   });
 }
 
-// ── DETALHE / SIMULADO ────────────────────────────────────────────────────────
+// ── DETALHE ───────────────────────────────────────────────────────────────────
 
 function _renderDetalhe(container, conteudo) {
   renderizar(container, htmlDetalheConteudo(conteudo));
-
-  container.querySelector('#btn-detalhe-voltar')?.addEventListener('click', () => {
-    _renderListagem(container);
-  });
-
-  if (conteudo.questoes?.length > 0) {
-    inicializarSimuladoAluno(container, conteudo);
-  }
+  container.querySelector('#btn-detalhe-voltar')?.addEventListener('click', () => _renderListagem(container));
+  if (conteudo.questoes?.length > 0) inicializarSimuladoAluno(container, conteudo);
 }
 
-/**
- * Versão do simulado para alunos — salva resultado na planilha ao corrigir.
- */
+// ── SIMULADO ALUNO ────────────────────────────────────────────────────────────
+
 function inicializarSimuladoAluno(container, conteudo) {
   inicializarSimulado(conteudo.questoes);
 
-  // Intercepta o botão de corrigir para salvar o resultado
   const btnCorrigir = document.getElementById('btn-corrigir');
   if (!btnCorrigir) return;
 
@@ -232,14 +240,12 @@ function inicializarSimuladoAluno(container, conteudo) {
   btnCorrigir.parentNode.replaceChild(btnOriginal, btnCorrigir);
 
   btnOriginal.addEventListener('click', async () => {
-    // Coleta respostas
-    const questoes = conteudo.questoes;
+    const questoes  = conteudo.questoes;
     const respostas = new Map();
     document.querySelectorAll('.alternativa.selecionada').forEach(el => {
       respostas.set(Number(el.dataset.questao), Number(el.dataset.alt));
     });
 
-    // Corrige visualmente (chama lógica do ui.js)
     let acertos = 0;
     questoes.forEach((q, qi) => {
       const respondida = respostas.get(qi);
@@ -253,16 +259,12 @@ function inicializarSimuladoAluno(container, conteudo) {
       if (respondida === q.correta) acertos++;
     });
 
-    const placar = document.getElementById('simulado-placar');
+    const placar    = document.getElementById('simulado-placar');
     const btnRefazer = document.getElementById('btn-refazer');
-    if (placar) {
-      placar.innerHTML = `Resultado: <strong>${acertos}/${questoes.length}</strong> acertos`;
-      placar.style.display = '';
-    }
+    if (placar) { placar.innerHTML = `Resultado: <strong>${acertos}/${questoes.length}</strong> acertos`; placar.style.display = ''; }
     btnOriginal.style.display = 'none';
     if (btnRefazer) btnRefazer.style.display = '';
 
-    // Salva na planilha
     await _salvarResultado(conteudo, acertos, questoes.length);
   });
 }
@@ -270,28 +272,14 @@ function inicializarSimuladoAluno(container, conteudo) {
 // ── SALVAR RESULTADO ──────────────────────────────────────────────────────────
 
 async function _salvarResultado(conteudo, acertos, total) {
-  const API_URL_KEY = 'COLOCAR_AQUI_URL';
-
-  try {
-    const { default: apiUrl } = await import('../../modules/api.js').then(m => ({ default: m })).catch(() => ({}));
-  } catch (_) {}
-
-  // Importa a URL dinamicamente do api.js
   const mod = await import('../../modules/api.js');
-
   const payload = {
-    acao:      'salvar_resultado',
-    aluno:     _aluno.nome,
-    turma:     _aluno.turma,
-    simulado:  conteudo.titulo,
-    professor: conteudo.professor,
-    materia:   conteudo.materia,
-    acertos,
-    total,
-    nota:      `${acertos}/${total}`,
-    data:      new Date().toISOString(),
+    acao: 'salvar_resultado',
+    aluno: _aluno.nome, turma: _aluno.turma,
+    simulado: conteudo.titulo, professor: conteudo.professor,
+    materia: conteudo.materia, acertos, total,
+    nota: `${acertos}/${total}`, data: new Date().toISOString(),
   };
-
   try {
     await mod.publicarConteudo(payload);
     _mostrarToast('✅ Resultado salvo!');
@@ -303,32 +291,17 @@ async function _salvarResultado(conteudo, acertos, total) {
 
 function _mostrarToast(msg) {
   const toast = document.createElement('div');
-  toast.style.cssText = `
-    position:fixed; bottom:2.5rem; left:50%; transform:translateX(-50%);
-    background:var(--card); border:1px solid var(--border-strong);
-    color:var(--text); font-family:var(--font-mono); font-size:0.78rem;
-    padding:0.6rem 1.2rem; border-radius:20px; z-index:9998;
-    box-shadow:var(--shadow-card); white-space:nowrap;
-    animation: fadeInUp 0.3s ease;
-  `;
+  toast.style.cssText = `position:fixed;bottom:2.5rem;left:50%;transform:translateX(-50%);
+    background:var(--card);border:1px solid var(--border-strong);color:var(--text);
+    font-family:var(--font-mono);font-size:0.78rem;padding:0.6rem 1.2rem;
+    border-radius:20px;z-index:9998;box-shadow:var(--shadow-card);white-space:nowrap`;
   toast.textContent = msg;
   document.body.appendChild(toast);
   setTimeout(() => toast.remove(), 3000);
 }
 
-// ── SESSÃO (localStorage) ─────────────────────────────────────────────────────
+// ── SESSÃO ────────────────────────────────────────────────────────────────────
 
-function _salvarSessao(aluno) {
-  try { localStorage.setItem('cej_aluno', JSON.stringify(aluno)); } catch (_) {}
-}
-
-function _carregarSessao() {
-  try {
-    const s = localStorage.getItem('cej_aluno');
-    return s ? JSON.parse(s) : null;
-  } catch (_) { return null; }
-}
-
-function _limparSessao() {
-  try { localStorage.removeItem('cej_aluno'); } catch (_) {}
-}
+function _salvarSessao(aluno)  { try { localStorage.setItem('cej_aluno', JSON.stringify(aluno)); } catch (_) {} }
+function _carregarSessao()     { try { const s = localStorage.getItem('cej_aluno'); return s ? JSON.parse(s) : null; } catch (_) { return null; } }
+function _limparSessao()       { try { localStorage.removeItem('cej_aluno'); } catch (_) {} }

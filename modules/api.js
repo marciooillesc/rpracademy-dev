@@ -28,7 +28,7 @@ export async function buscarConteudos(forcarRecarregar = false) {
     return cached.dados;
   }
 
-  if (!API_URL || API_URL === 'https://script.google.com/macros/s/AKfycbySFUJ-ApoxwwG5EaoAcORbL2iaPj_r29-Xssi22ppxjKQidkU6aNikBmDh5eXvkswUGg/exec') {
+  if (!API_URL) {
     console.warn('[api] API_URL não configurada. Retornando dados de demonstração.');
     return _dadosDemostracao();
   }
@@ -124,7 +124,7 @@ function _estaAtivo(item) {
  * @returns {Promise<Object>} - { status: 'ok' } ou { status: 'erro', mensagem }
  */
 export async function publicarConteudo(dados) {
-  if (!API_URL || API_URL === 'https://script.google.com/macros/s/AKfycbySFUJ-ApoxwwG5EaoAcORbL2iaPj_r29-Xssi22ppxjKQidkU6aNikBmDh5eXvkswUGg/exec') {
+  if (!API_URL) {
     throw new Error('API_URL não configurada.');
   }
 
@@ -170,7 +170,7 @@ export async function publicarConteudo(dados) {
  * @returns {Promise<Object>}
  */
 export async function removerConteudo(titulo, professor) {
-  if (!API_URL || API_URL === 'https://script.google.com/macros/s/AKfycbySFUJ-ApoxwwG5EaoAcORbL2iaPj_r29-Xssi22ppxjKQidkU6aNikBmDh5eXvkswUGg/exec') {
+  if (!API_URL) {
     throw new Error('API_URL não configurada.');
   }
 

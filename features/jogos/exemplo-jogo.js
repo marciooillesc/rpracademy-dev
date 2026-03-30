@@ -8,7 +8,7 @@ export const META = {
   id: 'exemplo',
   nome: 'Jogo Exemplo',
   descricao: 'Demonstra a estrutura de um módulo de jogo',
-  emoji: '🧩',
+  emoji: '',
 };
 
 /**
@@ -20,7 +20,7 @@ export function render(container) {
   container.innerHTML = `
     <div class="jogo-area">
       <div class="page-header">
-        <span class="page-header__eyebrow">🧩 Jogo</span>
+        <span class="page-header__eyebrow">Jogo</span>
         <h1 class="page-header__titulo">Jogo Exemplo</h1>
         <p class="page-header__desc">Este é um template. Copie este arquivo para criar seu próprio jogo.</p>
       </div>

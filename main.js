@@ -1,6 +1,6 @@
 /**
  * main.js
- * Entrada principal do SPA CEJ Educação Digital.
+ * Entrada principal do SPA RPR Academy.
  * Inicializa módulos, registra rotas e gerencia transições.
  */
 
@@ -177,7 +177,7 @@ function _renderJogosHome(container) {
   container.innerHTML = `
     <div>
       <div class="page-header">
-        <span class="page-header__eyebrow">🎮 Jogos</span>
+        <span class="page-header__eyebrow">Jogos</span>
         <h1 class="page-header__titulo">Jogos Disponíveis</h1>
         <p class="page-header__desc">Selecione um jogo para jogar. Novos jogos são adicionados constantemente.</p>
       </div>

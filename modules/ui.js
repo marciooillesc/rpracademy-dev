@@ -119,12 +119,55 @@ export function htmlConteudoItem(item, idx) {
 }
 
 /**
+ * Converte link de compartilhamento do Google Drive para URL de embed.
+ * Suporta formatos /file/d/ID/view e /open?id=ID
+ * @param {string} url
+ * @param {boolean} permitirDownload
+ * @returns {string} - HTML do iframe ou ''
+ */
+function _htmlArquivoDrive(url, permitirDownload) {
+  if (!url || !url.includes('drive.google.com')) return '';
+
+  // Extrai o ID do arquivo
+  let fileId = '';
+  const matchFile = url.match(/\/file\/d\/([^/?\s]+)/);
+  const matchOpen = url.match(/[?&]id=([^&\s]+)/);
+  if (matchFile) fileId = matchFile[1];
+  else if (matchOpen) fileId = matchOpen[1];
+
+  if (!fileId) return '';
+
+  const embedUrl = `https://drive.google.com/file/d/${fileId}/preview${permitirDownload ? '' : '?rm=minimal'}`;
+  const downloadUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+
+  return `
+    <div class="arquivo-embed">
+      <div class="arquivo-embed__header">
+        <span class="arquivo-embed__titulo">📎 Arquivo anexado</span>
+        ${permitirDownload
+          ? `<a class="btn btn--ghost btn--sm" href="${downloadUrl}" target="_blank" download>⬇ Baixar</a>`
+          : `<span style="font-size:0.75rem;color:var(--text-3);font-family:var(--font-mono)">Download desativado</span>`
+        }
+      </div>
+      <iframe
+        src="${embedUrl}"
+        class="arquivo-embed__iframe"
+        allow="autoplay"
+        allowfullscreen
+      ></iframe>
+    </div>
+  `;
+}
+
+/**
  * Gera HTML completo de detalhe de conteúdo.
  * @param {Object} item
  * @returns {string}
  */
 export function htmlDetalheConteudo(item) {
   const temQuestoes = item.questoes && Array.isArray(item.questoes) && item.questoes.length > 0;
+  const permitirDownload = item.permitir_download !== 'nao';
+  const arquivoHTML = _htmlArquivoDrive(item.link || '', permitirDownload);
 
   return `
     <div class="detalhe">
@@ -143,6 +186,7 @@ export function htmlDetalheConteudo(item) {
           ${item.data_de_publicacao ? `<span class="detalhe__meta-tag">📅 ${formatarData(item.data_de_publicacao)}</span>` : ''}
         </div>
         <p class="detalhe__descricao">${_escapar(item.descricao || 'Sem descrição.')}</p>
+        ${arquivoHTML}
         ${temQuestoes ? htmlSimulado(item.questoes) : ''}
       </div>
     </div>
