@@ -1,4 +1,7 @@
 export async function handler(event) {
+  
+console.log("API KEY:", process.env.OPENROUTER_API_KEY);
+  
   try {
     const { messages } = JSON.parse(event.body);
 
