@@ -80,8 +80,6 @@ function _ativarModo(modo) {
     // Navega para rota padrão do modo
     if (modo === 'jogos') {
       navegar('jogos-home');
-    } else if (modo === 'busca') {
-    navegar('busca');
   } else {
     navegar('professores');
   }
