@@ -166,9 +166,6 @@ function _abrirDetalhe(container, item, todosConteudos, usuario) {
 }
 
 /* ── UTIL ────────────────────────────────────────────────────────────────────── */
-function filtrarPorTurma(conteudos, turma) {
-  return conteudos.filter(c => c.turma?.toLowerCase() === turma.toLowerCase());
-}
 
 function _esc(str) {
   if (typeof str !== 'string') return str ?? '';
