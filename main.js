@@ -33,9 +33,23 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   btnAcademico.addEventListener("click", () => {
-    setEstado({ modo: "academico" });
-    navegar("professores");
-  });
+  const estado = getEstado();
+
+  // 🔒 se não está logado
+  if (!estado.usuario) {
+    abrirLogin();
+    return;
+  }
+
+  // 🔒 se não aprovado
+  if (estado.usuario.status !== "aprovado") {
+    alert("Aguardando aprovação");
+    return;
+  }
+
+  // ✅ libera acesso
+  setEstado({ modo: "academico" });
+  navegar("professores");
 });
 
 // ── ROTAS ──────────────────────────────────────────────────────────────────────
