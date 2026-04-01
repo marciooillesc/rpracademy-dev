@@ -52,6 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
   navegar("professores");
 });
 
+});
+
 // ── ROTAS ──────────────────────────────────────────────────────────────────────
 function _registrarRotas() {
   // ── Acadêmico
