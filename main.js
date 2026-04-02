@@ -33,6 +33,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   _bindBotoesInicio();
   _bindBotaoVoltar();
 
+  // Detecta link de redefinição de senha (hash #type=recovery)
+  const hashParams = new URLSearchParams(window.location.hash.slice(1));
+  if (hashParams.get('type') === 'recovery') {
+    history.replaceState(null, '', window.location.pathname); // limpa o hash da URL
+    _abrirModalNovaSenha();
+    return;
+  }
+
   // Restaura sessão persistente
   const perfil = await restaurarSessao();
   if (perfil) {
@@ -465,4 +473,83 @@ function _mostrarErroModal(el, msg) {
 
 function _bindBotaoVoltar() {
   btnVoltar?.addEventListener('click', _voltarInicio);
+}
+
+/** Modal para definir nova senha (após clicar no link de recovery do e-mail) */
+function _abrirModalNovaSenha() {
+  const overlay = document.createElement('div');
+  overlay.id = 'modal-login-overlay';
+  overlay.innerHTML = `
+    <div class="modal-login">
+      <div class="modal-login__logo">
+        <span class="modal-login__sigla">RPR</span>
+        <span class="modal-login__nome">Nova Senha</span>
+      </div>
+      <p class="modal-login__desc">Digite sua nova senha para continuar</p>
+
+      <div class="modal-login__campo">
+        <label>Nova senha</label>
+        <input id="ml-nova-senha" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+      </div>
+      <div class="modal-login__campo">
+        <label>Confirmar senha</label>
+        <input id="ml-conf-senha" type="password" placeholder="Repita a senha" autocomplete="new-password" />
+      </div>
+
+      <div id="ml-nova-msg" class="modal-login__erro oculto"></div>
+
+      <button class="modal-login__btn" id="ml-btn-nova">Salvar nova senha</button>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => overlay.classList.add('ativo'));
+
+  const btn   = document.getElementById('ml-btn-nova');
+  const msgEl = document.getElementById('ml-nova-msg');
+
+  btn.addEventListener('click', async () => {
+    const nova = document.getElementById('ml-nova-senha').value;
+    const conf = document.getElementById('ml-conf-senha').value;
+
+    if (!nova || nova.length < 6) {
+      msgEl.textContent = 'A senha precisa ter pelo menos 6 caracteres.';
+      msgEl.style.color = '';
+      msgEl.classList.remove('oculto');
+      return;
+    }
+    if (nova !== conf) {
+      msgEl.textContent = 'As senhas não coincidem.';
+      msgEl.style.color = '';
+      msgEl.classList.remove('oculto');
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Salvando…';
+
+    const { supabase } = await import('./modules/supabase.js');
+    const { error } = await supabase.auth.updateUser({ password: nova });
+
+    if (error) {
+      msgEl.textContent = 'Erro ao salvar: ' + error.message;
+      msgEl.style.color = '';
+      msgEl.classList.remove('oculto');
+      btn.disabled = false;
+      btn.textContent = 'Salvar nova senha';
+    } else {
+      msgEl.textContent = '✅ Senha redefinida com sucesso! Faça login.';
+      msgEl.style.color = 'var(--accent)';
+      msgEl.classList.remove('oculto');
+      btn.textContent = 'Concluído!';
+      setTimeout(() => {
+        overlay.classList.remove('ativo');
+        setTimeout(() => { overlay.remove(); _abrirModalLogin(); }, 300);
+      }, 2000);
+    }
+  });
+
+  [document.getElementById('ml-nova-senha'), document.getElementById('ml-conf-senha')]
+    .forEach(el => el.addEventListener('keydown', e => {
+      if (e.key === 'Enter') btn.click();
+    }));
 }
