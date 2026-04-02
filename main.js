@@ -293,40 +293,67 @@ function _entrarAcademico(usuario) {
 
 /** Modal de login estilizado */
 function _abrirModalLogin() {
-  // Cria overlay
   const overlay = document.createElement('div');
   overlay.id = 'modal-login-overlay';
   overlay.innerHTML = `
     <div class="modal-login">
       <button class="modal-login__fechar" id="modal-fechar">✕</button>
-      <div class="modal-login__logo">
-        <span class="modal-login__sigla">RPR</span>
-        <span class="modal-login__nome">Área Acadêmica</span>
+
+      <!-- TELA 1: LOGIN -->
+      <div id="ml-tela-login">
+        <div class="modal-login__logo">
+          <span class="modal-login__sigla">RPR</span>
+          <span class="modal-login__nome">Área Acadêmica</span>
+        </div>
+        <p class="modal-login__desc">Acesse com seu cadastro aprovado</p>
+
+        <div class="modal-login__campo">
+          <label>E-mail</label>
+          <input id="ml-email" type="email" placeholder="seu@email.com" autocomplete="email" />
+        </div>
+        <div class="modal-login__campo">
+          <label>Senha</label>
+          <input id="ml-senha" type="password" placeholder="••••••••" autocomplete="current-password" />
+        </div>
+
+        <div id="ml-erro" class="modal-login__erro oculto"></div>
+
+        <button class="modal-login__btn" id="ml-entrar">Entrar</button>
+
+        <p class="modal-login__rodape">
+          <a href="#" class="modal-login__link" id="ml-link-esqueci">Esqueci minha senha</a>
+        </p>
+        <p class="modal-login__rodape">
+          Não tem conta?
+          <a href="/cadastro" class="modal-login__link">Cadastre-se</a>
+        </p>
       </div>
-      <p class="modal-login__desc">Acesse com seu cadastro aprovado</p>
 
-      <div class="modal-login__campo">
-        <label>E-mail</label>
-        <input id="ml-email" type="email" placeholder="seu@email.com" autocomplete="email" />
+      <!-- TELA 2: ESQUECI SENHA -->
+      <div id="ml-tela-reset" style="display:none">
+        <div class="modal-login__logo">
+          <span class="modal-login__sigla">RPR</span>
+          <span class="modal-login__nome">Redefinir Senha</span>
+        </div>
+        <p class="modal-login__desc">Digite seu e-mail para receber o link de redefinição</p>
+
+        <div class="modal-login__campo">
+          <label>E-mail</label>
+          <input id="ml-reset-email" type="email" placeholder="seu@email.com" autocomplete="email" />
+        </div>
+
+        <div id="ml-reset-msg" class="modal-login__erro oculto"></div>
+
+        <button class="modal-login__btn" id="ml-btn-reset">Enviar link</button>
+
+        <p class="modal-login__rodape">
+          <a href="#" class="modal-login__link" id="ml-link-voltar">← Voltar ao login</a>
+        </p>
       </div>
-      <div class="modal-login__campo">
-        <label>Senha</label>
-        <input id="ml-senha" type="password" placeholder="••••••••" autocomplete="current-password" />
-      </div>
-
-      <div id="ml-erro" class="modal-login__erro oculto"></div>
-
-      <button class="modal-login__btn" id="ml-entrar">Entrar</button>
-
-      <p class="modal-login__rodape">
-        Não tem conta?
-        <a href="/cadastro" class="modal-login__link">Cadastre-se</a>
-      </p>
     </div>
   `;
   document.body.appendChild(overlay);
 
-  // Anima entrada
   requestAnimationFrame(() => overlay.classList.add('ativo'));
 
   const fechar = () => {
@@ -337,6 +364,24 @@ function _abrirModalLogin() {
   overlay.addEventListener('click', e => { if (e.target === overlay) fechar(); });
   document.getElementById('modal-fechar').addEventListener('click', fechar);
 
+  // Alternar entre telas
+  const telaLogin = document.getElementById('ml-tela-login');
+  const telaReset = document.getElementById('ml-tela-reset');
+
+  document.getElementById('ml-link-esqueci').addEventListener('click', e => {
+    e.preventDefault();
+    telaLogin.style.display = 'none';
+    telaReset.style.display = '';
+    document.getElementById('ml-reset-email').focus();
+  });
+
+  document.getElementById('ml-link-voltar').addEventListener('click', e => {
+    e.preventDefault();
+    telaReset.style.display = 'none';
+    telaLogin.style.display = '';
+  });
+
+  // Login
   const btnEntrar = document.getElementById('ml-entrar');
   const elErro    = document.getElementById('ml-erro');
 
@@ -367,11 +412,50 @@ function _abrirModalLogin() {
     _entrarAcademico(perfil);
   });
 
-  // Enter submete
   [document.getElementById('ml-email'), document.getElementById('ml-senha')]
     .forEach(el => el.addEventListener('keydown', e => {
       if (e.key === 'Enter') btnEntrar.click();
     }));
+
+  // Reset de senha
+  const btnReset  = document.getElementById('ml-btn-reset');
+  const elResetMsg = document.getElementById('ml-reset-msg');
+
+  btnReset.addEventListener('click', async () => {
+    const email = document.getElementById('ml-reset-email').value.trim();
+    if (!email) {
+      elResetMsg.textContent = 'Informe seu e-mail.';
+      elResetMsg.style.color = '';
+      elResetMsg.classList.remove('oculto');
+      return;
+    }
+
+    btnReset.disabled = true;
+    btnReset.textContent = 'Enviando…';
+
+    import('./modules/supabase.js').then(async ({ supabase }) => {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: 'https://educacaodigital.iprpr.dev.br'
+      });
+
+      if (error) {
+        elResetMsg.textContent = 'Erro ao enviar. Tente novamente.';
+        elResetMsg.style.color = '';
+        elResetMsg.classList.remove('oculto');
+        btnReset.disabled = false;
+        btnReset.textContent = 'Enviar link';
+      } else {
+        elResetMsg.textContent = '✅ Link enviado! Verifique seu e-mail.';
+        elResetMsg.style.color = 'var(--accent)';
+        elResetMsg.classList.remove('oculto');
+        btnReset.textContent = 'Enviado!';
+      }
+    });
+  });
+
+  document.getElementById('ml-reset-email').addEventListener('keydown', e => {
+    if (e.key === 'Enter') btnReset.click();
+  });
 }
 
 function _mostrarErroModal(el, msg) {
