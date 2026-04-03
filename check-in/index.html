@@ -5,11 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Check-in de Presença</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -25,369 +21,323 @@
       background: white;
       border-radius: 16px;
       padding: 2rem;
-      max-width: 500px;
+      max-width: 520px;
       width: 100%;
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
       text-align: center;
     }
 
-    .logo {
-      font-size: 2.5rem;
-      margin-bottom: 1rem;
-    }
-
-    h1 {
-      font-size: 1.8rem;
-      margin-bottom: 0.5rem;
-      color: #333;
-    }
-
-    .subtitulo {
-      color: #666;
-      margin-bottom: 2rem;
-      font-size: 0.95rem;
-    }
+    .logo { font-size: 2.5rem; margin-bottom: 1rem; }
+    h1 { font-size: 1.8rem; margin-bottom: 0.5rem; color: #333; }
+    .subtitulo { color: #666; margin-bottom: 1.5rem; font-size: 0.95rem; }
 
     .card {
       background: #f9fafb;
       border-radius: 12px;
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
       border-left: 4px solid #667eea;
+      text-align: left;
     }
-
     .card-label {
-      font-weight: 600;
-      color: #6b7280;
-      margin-bottom: 0.5rem;
-      font-size: 0.9rem;
+      font-weight: 600; color: #6b7280; margin-bottom: 0.4rem;
+      font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em;
     }
 
-    .card-valor {
-      font-size: 1.1rem;
-      color: #333;
-      word-break: break-all;
+    input[type="text"], input[type="date"] {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1.5px solid #e5e7eb;
+      border-radius: 8px;
+      font-size: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
     }
+    input:focus { border-color: #667eea; }
 
     .botao {
-      background: #667eea;
-      color: white;
-      border: none;
-      padding: 1rem;
-      border-radius: 8px;
-      font-size: 1.1rem;
-      font-weight: 600;
-      cursor: pointer;
-      width: 100%;
-      transition: all 0.3s;
-      margin-bottom: 1rem;
+      background: #667eea; color: white; border: none;
+      padding: 0.9rem; border-radius: 8px; font-size: 1.05rem;
+      font-weight: 600; cursor: pointer; width: 100%;
+      transition: all 0.2s; margin-bottom: 0.75rem;
     }
-
-    .botao:hover {
-      background: #5568d3;
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-    }
-
-    .botao:active {
-      transform: translateY(0);
-    }
-
-    .botao--secundario {
-      background: #6b7280;
-      margin-top: 0.5rem;
-    }
-
-    .botao--secundario:hover {
-      background: #4b5563;
-    }
+    .botao:hover { background: #5568d3; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(102,126,234,0.4); }
+    .botao:active { transform: translateY(0); }
+    .botao--secundario { background: #6b7280; }
+    .botao--secundario:hover { background: #4b5563; }
+    .botao--verde { background: #10b981; }
+    .botao--verde:hover { background: #059669; }
 
     .mensagem-sucesso {
-      background: #ecfdf5;
-      border-left: 4px solid #10b981;
-      padding: 1rem;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-      color: #047857;
-      font-weight: 500;
+      background: #ecfdf5; border-left: 4px solid #10b981;
+      padding: 1rem; border-radius: 8px; margin-bottom: 1rem;
+      color: #047857; font-weight: 500;
     }
-
     .mensagem-erro {
-      background: #fef2f2;
-      border-left: 4px solid #ef4444;
-      padding: 1rem;
-      border-radius: 8px;
-      margin-bottom: 1rem;
-      color: #991b1b;
-      font-weight: 500;
+      background: #fef2f2; border-left: 4px solid #ef4444;
+      padding: 1rem; border-radius: 8px; margin-bottom: 1rem;
+      color: #991b1b; font-weight: 500;
     }
 
     .spinner {
-      border: 3px solid #e5e7eb;
-      border-top: 3px solid #667eea;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      animation: spin 1s linear infinite;
-      margin: 1rem auto;
+      border: 3px solid #e5e7eb; border-top: 3px solid #667eea;
+      border-radius: 50%; width: 40px; height: 40px;
+      animation: spin 1s linear infinite; margin: 1rem auto;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    #qr-imagem {
+      max-width: 280px; width: 100%; border-radius: 12px;
+      margin: 0.75rem auto; display: block;
+      border: 4px solid #667eea;
     }
 
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
+    .badge-data {
+      display: inline-block; background: #ede9fe; color: #7c3aed;
+      padding: 0.3rem 0.9rem; border-radius: 20px;
+      font-size: 0.9rem; font-weight: 600; margin-bottom: 1rem;
     }
+
+    .instrucao { font-size: 0.9rem; color: #6b7280; margin-bottom: 1.25rem; line-height: 1.5; }
+
+    details summary { cursor: pointer; font-size: 0.85rem; color: #6b7280; margin-bottom: 0.5rem; }
+    .row-data { display: flex; gap: 0.5rem; margin-top: 0.5rem; }
+    .row-data input { flex: 1; }
+    .row-data .botao { width: auto; padding: 0.75rem 1rem; margin: 0; }
 
     .footer {
-      margin-top: 2rem;
-      padding-top: 1rem;
-      border-top: 1px solid #e5e7eb;
-      font-size: 0.85rem;
-      color: #999;
+      margin-top: 1.5rem; padding-top: 1rem;
+      border-top: 1px solid #e5e7eb; font-size: 0.82rem; color: #aaa;
     }
 
-    @media (max-width: 480px) {
-      .container {
-        padding: 1.5rem;
-      }
-
-      h1 {
-        font-size: 1.5rem;
-      }
-
-      .logo {
-        font-size: 2rem;
-      }
-    }
-
-    #tela-professor {
-      display: none;
-    }
-
-    #tela-aluno {
-      display: none;
-    }
+    #tela-professor, #tela-aluno, #tela-confirmado, #tela-erro-geral { display: none; }
   </style>
 </head>
 <body>
-  <div class="container">
-    <!-- CARREGANDO -->
-    <div id="tela-carregando">
+<div class="container">
+
+  <!-- CARREGANDO -->
+  <div id="tela-carregando">
+    <div class="spinner"></div>
+    <h1>Carregando...</h1>
+    <p class="subtitulo">Aguarde um momento</p>
+  </div>
+
+  <!-- PROFESSOR — TELÃO -->
+  <div id="tela-professor">
+    <div class="logo">📱</div>
+    <h1>Check-in de Presença</h1>
+    <p class="subtitulo">Mostre este QR code para os alunos escanearem</p>
+
+    <div id="prof-gerando" style="display:none;">
       <div class="spinner"></div>
-      <h1>Carregando...</h1>
-      <p class="subtitulo">Processando sua solicitação</p>
+      <p class="instrucao">Gerando QR code...</p>
     </div>
 
-    <!-- PROFESSOR (Gerar QR) -->
-    <div id="tela-professor">
-      <div class="logo">📱</div>
-      <h1>Gerar QR Code</h1>
-      <p class="subtitulo">Crie um novo QR code para sua aula</p>
-
-      <div class="card">
-        <div class="card-label">Data da Aula</div>
-        <input 
-          type="date" 
-          id="input-data" 
-          style="width: 100%; padding: 0.75rem; border: 1px solid #e5e7eb; border-radius: 8px; font-size: 1rem;"
-        >
-      </div>
-
-      <button class="botao" onclick="gerarQR()">📱 Gerar QR Code</button>
-
-      <div id="qr-resultado" style="display:none; margin-bottom: 1.5rem;">
-        <div class="mensagem-sucesso">✅ QR code gerado com sucesso!</div>
-        
-        <div class="card">
-          <div class="card-label">QR Code</div>
-          <img id="qr-imagem" src="" style="max-width: 100%; border-radius: 8px; margin: 1rem 0;">
-        </div>
-
-        <div class="card">
-          <div class="card-label">Token (Salve em lugar seguro)</div>
-          <div class="card-valor" id="qr-token"></div>
-        </div>
-
-        <div class="card">
-          <div class="card-label">Link para Compartilhar</div>
-          <div class="card-valor" id="qr-link" style="color: #667eea;"></div>
-        </div>
-
-        <button class="botao botao--secundario" onclick="copiarLink()">🔗 Copiar Link</button>
-        <button class="botao botao--secundario" onclick="novoQR()">➕ Gerar Novo</button>
-      </div>
-
-      <div id="qr-erro" style="display:none;">
-        <div class="mensagem-erro" id="qr-erro-msg"></div>
-        <button class="botao botao--secundario" onclick="tentarNovamente()">🔄 Tentar Novamente</button>
-      </div>
+    <div id="prof-qr" style="display:none;">
+      <div class="badge-data" id="prof-data-label"></div>
+      <img id="qr-imagem" src="" alt="QR Code de Presença">
+      <p class="instrucao">📷 Alunos: abra a câmera e aponte para este QR code</p>
+      <button class="botao botao--secundario" onclick="novoQR()">🔄 Gerar novo QR code</button>
     </div>
 
-    <!-- ALUNO (Confirmar Presença) -->
-    <div id="tela-aluno">
-      <div class="logo">✅</div>
-      <h1>Confirmar Presença</h1>
-      <p class="subtitulo">Clique para confirmar sua presença na aula</p>
-
-      <div class="card">
-        <div class="card-label">Aluno</div>
-        <div class="card-valor" id="aluno-nome"></div>
-      </div>
-
-      <button class="botao" onclick="confirmarPresenca()">✅ Confirmar Presença</button>
-
-      <div id="aluno-resultado" style="display:none; margin-bottom: 1.5rem;">
-        <div class="mensagem-sucesso" id="aluno-msg"></div>
-        <button class="botao botao--secundario" onclick="voltarHome()">🏠 Voltar ao Início</button>
-      </div>
-
-      <div id="aluno-erro" style="display:none;">
-        <div class="mensagem-erro" id="aluno-erro-msg"></div>
-        <button class="botao botao--secundario" onclick="voltarHome()">🏠 Voltar ao Início</button>
-      </div>
+    <div id="prof-erro" style="display:none;">
+      <div class="mensagem-erro" id="prof-erro-msg"></div>
+      <button class="botao botao--secundario" onclick="gerarQRAutomatico()">🔄 Tentar novamente</button>
     </div>
 
-    <div class="footer">
-      RPR Academy — Sistema de Presença
+    <details style="margin-top:1rem; text-align:left;">
+      <summary>⚙️ Alterar data da aula</summary>
+      <div class="row-data">
+        <input type="date" id="input-data">
+        <button class="botao" onclick="gerarQRManual()">Gerar</button>
+      </div>
+    </details>
+  </div>
+
+  <!-- ALUNO — APÓS ESCANEAR QR -->
+  <div id="tela-aluno">
+    <div class="logo">✅</div>
+    <h1>Confirmar Presença</h1>
+    <p class="subtitulo">Preencha seus dados para registrar presença</p>
+
+    <div class="badge-data" id="aluno-data-label"></div>
+
+    <div class="card">
+      <div class="card-label">Seu nome completo</div>
+      <input type="text" id="aluno-nome-input" placeholder="Ex: João da Silva" autocomplete="name">
+    </div>
+
+    <div class="card">
+      <div class="card-label">Turma</div>
+      <input type="text" id="aluno-turma-input" placeholder="Ex: 9A, 1º EM...">
+    </div>
+
+    <button class="botao botao--verde" onclick="confirmarPresenca()">✅ Confirmar minha presença</button>
+
+    <div id="aluno-erro" style="display:none; margin-top:0.5rem;">
+      <div class="mensagem-erro" id="aluno-erro-msg"></div>
     </div>
   </div>
 
-  <!-- Carregar SDK Supabase ANTES dos módulos -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- CONFIRMADO -->
+  <div id="tela-confirmado">
+    <div class="logo">🎉</div>
+    <h1>Presença confirmada!</h1>
+    <p class="subtitulo" id="confirmado-nome"></p>
+    <div class="mensagem-sucesso">✅ Sua presença foi registrada com sucesso!</div>
+    <p class="instrucao">Pode fechar esta aba.</p>
+  </div>
 
-  <script type="module">
-    import { gerarTokenCheckIn, confirmarPresencaComToken } from '../modules/check-in-simples.js';
-    import { restaurarSessao } from '../modules/auth.js';
+  <!-- ERRO GERAL -->
+  <div id="tela-erro-geral">
+    <div class="logo">⚠️</div>
+    <h1 id="erro-titulo">Erro</h1>
+    <p class="subtitulo" id="erro-msg"></p>
+    <button class="botao" onclick="window.location.href='/'">🏠 Ir para o início</button>
+  </div>
 
-    // ────────────────────────────────────────────────────────────────────────────
-    // INICIALIZAÇÃO
-    // ────────────────────────────────────────────────────────────────────────────
+  <div class="footer">RPR Academy — Sistema de Presença</div>
+</div>
 
-    async function inicializar() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const token = urlParams.get('token');
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-      // Usuário logado
-      const usuario = await restaurarSessao();
+<script>
+  const SUPABASE_URL = "https://gdjpwwmdfssvokuuibwz.supabase.co";
+  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdkanB3d21kZnNzdm9rdXVpYnd6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwNjExMjUsImV4cCI6MjA5MDYzNzEyNX0.JAHc5TVF4lR34nQ2UluQvYFZP8gxOvVDnM8_7mhTxl4";
+  const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-      if (!usuario) {
-        mostrarErro('tela-carregando', 'Você não está logado', 'Faça login primeiro');
-        return;
-      }
+  // ── utilitários ──────────────────────────────────────────────────────────────
+  function mostrarTela(id) {
+    ['tela-carregando','tela-professor','tela-aluno','tela-confirmado','tela-erro-geral']
+      .forEach(t => document.getElementById(t).style.display = (t === id ? 'block' : 'none'));
+  }
 
-      // Se veio com token (aluno escaneou QR)
-      if (token) {
-        // Guarda token em sessionStorage
-        sessionStorage.setItem('check_in_token', token);
-        
-        // Limpa URL (remove token da barra)
-        window.history.replaceState({}, document.title, '/check-in');
-        
-        // Mostra tela de aluno
-        document.getElementById('tela-carregando').style.display = 'none';
-        document.getElementById('tela-aluno').style.display = 'block';
-        document.getElementById('aluno-nome').textContent = usuario.nome;
-      } else {
-        // Sem token = professor (ou admin)
-        if (usuario.tipo !== 'professor' && usuario.tipo !== 'admin') {
-          mostrarErro('tela-carregando', 'Acesso restrito', 'Apenas professores e admins');
-          return;
-        }
+  function mostrarErroGeral(titulo, msg) {
+    document.getElementById('erro-titulo').textContent = titulo;
+    document.getElementById('erro-msg').textContent = msg;
+    mostrarTela('tela-erro-geral');
+  }
 
-        document.getElementById('tela-carregando').style.display = 'none';
-        document.getElementById('tela-professor').style.display = 'block';
-        
-        // Seta data de hoje por padrão
-        const hoje = new Date().toISOString().split('T')[0];
-        document.getElementById('input-data').value = hoje;
-      }
+  function dataHoje() { return new Date().toISOString().split('T')[0]; }
+
+  function formatarData(d) {
+    const [ano, mes, dia] = d.split('-');
+    return `${dia}/${mes}/${ano}`;
+  }
+
+  function gerarToken() {
+    const c = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    return Array.from({length: 50}, () => c[Math.floor(Math.random() * c.length)]).join('');
+  }
+
+  // ── professor: gerar QR ──────────────────────────────────────────────────────
+  async function gerarQR(data) {
+    document.getElementById('prof-gerando').style.display = 'block';
+    document.getElementById('prof-qr').style.display     = 'none';
+    document.getElementById('prof-erro').style.display   = 'none';
+
+    const token = gerarToken();
+
+    const { error } = await _sb.from('check_in').insert([{
+      token,
+      data,
+      presenca: false,
+    }]);
+
+    document.getElementById('prof-gerando').style.display = 'none';
+
+    if (error) {
+      document.getElementById('prof-erro-msg').textContent = error.message;
+      document.getElementById('prof-erro').style.display = 'block';
+      return;
     }
 
-    // ────────────────────────────────────────────────────────────────────────────
-    // PROFESSOR: GERAR QR
-    // ────────────────────────────────────────────────────────────────────────────
+    const url    = `${window.location.origin}/check-in?token=${token}`;
+    const qrUrl  = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&data=${encodeURIComponent(url)}`;
 
-    window.gerarQR = async function() {
-      const data = document.getElementById('input-data').value;
+    document.getElementById('qr-imagem').src = qrUrl;
+    document.getElementById('prof-data-label').textContent = `📅 ${formatarData(data)}`;
+    document.getElementById('prof-qr').style.display = 'block';
+  }
 
-      if (!data) {
-        alert('Selecione uma data');
-        return;
-      }
+  window.gerarQRAutomatico = () => gerarQR(dataHoje());
 
-      const resultado = await gerarTokenCheckIn(data);
+  window.gerarQRManual = () => {
+    const d = document.getElementById('input-data').value;
+    if (!d) { alert('Selecione uma data'); return; }
+    gerarQR(d);
+  };
 
-      if (resultado.erro) {
-        document.getElementById('qr-erro').style.display = 'block';
-        document.getElementById('qr-erro-msg').textContent = resultado.erro;
-        return;
-      }
+  window.novoQR = () => gerarQR(document.getElementById('input-data').value || dataHoje());
 
-      document.getElementById('qr-resultado').style.display = 'block';
-      document.getElementById('qr-imagem').src = resultado.qrUrl;
-      document.getElementById('qr-token').textContent = resultado.token;
-      document.getElementById('qr-link').textContent = resultado.urlComToken;
+  // ── aluno: tela após escanear ────────────────────────────────────────────────
+  async function mostrarTelaAluno(token) {
+    const { data: reg, error } = await _sb
+      .from('check_in')
+      .select('id, data, presenca')
+      .eq('token', token)
+      .single();
 
-      // Guarda para copiar
-      window.linkAtual = resultado.urlComToken;
-    };
-
-    window.copiarLink = function() {
-      navigator.clipboard.writeText(window.linkAtual);
-      alert('✅ Link copiado!');
-    };
-
-    window.novoQR = function() {
-      document.getElementById('qr-resultado').style.display = 'none';
-      document.getElementById('qr-erro').style.display = 'none';
-    };
-
-    window.tentarNovamente = function() {
-      document.getElementById('qr-erro').style.display = 'none';
-      window.gerarQR();
-    };
-
-    // ────────────────────────────────────────────────────────────────────────────
-    // ALUNO: CONFIRMAR PRESENÇA
-    // ────────────────────────────────────────────────────────────────────────────
-
-    window.confirmarPresenca = async function() {
-      const resultado = await confirmarPresencaComToken();
-
-      if (resultado.erro) {
-        document.getElementById('aluno-resultado').style.display = 'none';
-        document.getElementById('aluno-erro').style.display = 'block';
-        document.getElementById('aluno-erro-msg').textContent = resultado.erro;
-        return;
-      }
-
-      document.getElementById('aluno-erro').style.display = 'none';
-      document.getElementById('aluno-resultado').style.display = 'block';
-      document.getElementById('aluno-msg').textContent = '✅ Presença confirmada com sucesso!';
-    };
-
-    window.voltarHome = function() {
-      window.location.href = '/';
-    };
-
-    // ────────────────────────────────────────────────────────────────────────────
-    // INICIAR
-    // ────────────────────────────────────────────────────────────────────────────
-
-    // ────────────────────────────────────────────────────────────────────────────
-    // UTILITÁRIO: MOSTRAR ERRO NA TELA DE CARREGAMENTO
-    // ────────────────────────────────────────────────────────────────────────────
-
-    function mostrarErro(telaId, titulo, mensagem) {
-      const tela = document.getElementById(telaId);
-      tela.innerHTML = `
-        <div class="logo">⚠️</div>
-        <h1>${titulo}</h1>
-        <p class="subtitulo">${mensagem}</p>
-        <button class="botao" onclick="window.location.href='/'">🏠 Ir para o início</button>
-      `;
+    if (error || !reg) {
+      mostrarErroGeral('QR Code inválido', 'Este QR code não existe ou já expirou. Peça ao professor para gerar um novo.');
+      return;
     }
 
-    inicializar();
-  </script>
+    if (reg.presenca) {
+      mostrarErroGeral('QR já utilizado', 'Este QR code já foi usado. Peça ao professor para gerar um novo.');
+      return;
+    }
+
+    window._checkInId = reg.id;
+    document.getElementById('aluno-data-label').textContent = `📅 ${formatarData(reg.data)}`;
+    mostrarTela('tela-aluno');
+    document.getElementById('aluno-nome-input').focus();
+  }
+
+  // ── aluno: confirmar presença ────────────────────────────────────────────────
+  window.confirmarPresenca = async function() {
+    const nome  = document.getElementById('aluno-nome-input').value.trim();
+    const turma = document.getElementById('aluno-turma-input').value.trim();
+    const erroDiv = document.getElementById('aluno-erro');
+    const erroMsg = document.getElementById('aluno-erro-msg');
+
+    erroDiv.style.display = 'none';
+
+    if (!nome) {
+      erroMsg.textContent = 'Por favor, informe seu nome completo.';
+      erroDiv.style.display = 'block';
+      return;
+    }
+
+    const { error } = await _sb.from('check_in').update({
+      aluno_nome:  nome,
+      aluno_turma: turma || null,
+      presenca:    true,
+      timestamp:   new Date().toISOString(),
+    }).eq('id', window._checkInId);
+
+    if (error) {
+      erroMsg.textContent = error.message;
+      erroDiv.style.display = 'block';
+      return;
+    }
+
+    document.getElementById('confirmado-nome').textContent = `Olá, ${nome}! ✌️`;
+    mostrarTela('tela-confirmado');
+  };
+
+  // ── init ─────────────────────────────────────────────────────────────────────
+  (async function inicializar() {
+    const token = new URLSearchParams(window.location.search).get('token');
+    if (token) {
+      await mostrarTelaAluno(token);
+    } else {
+      mostrarTela('tela-professor');
+      document.getElementById('input-data').value = dataHoje();
+      await gerarQRAutomatico();
+    }
+  })();
+</script>
 </body>
 </html>
