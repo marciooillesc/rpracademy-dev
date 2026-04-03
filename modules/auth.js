@@ -52,7 +52,7 @@ async function _carregarPerfil(userId) {
     .from('usuarios')
     .select('*')
     .eq('id', userId)
-    .single();
+    .maybeSingle();
   if (error || !data) return null;
   return data;
 }
