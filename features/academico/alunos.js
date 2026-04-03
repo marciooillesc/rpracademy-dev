@@ -13,7 +13,7 @@ import {
 export async function renderAlunos(container) {
   const { usuario } = getEstado();
   if (!usuario) { container.innerHTML = htmlErro('Você precisa estar logado.'); return; }
-  if (usuario.tipo !== 'aluno' && usuario.tipo !== 'admin') {
+  if (!(usuario.tipo === 'aluno' || usuario.isAluno || usuario.tipo === 'admin')) {
     container.innerHTML = htmlErro('Acesso restrito a alunos.');
     return;
   }
