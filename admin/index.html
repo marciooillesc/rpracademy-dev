@@ -493,15 +493,20 @@ document.querySelectorAll('.tab').forEach(tab => {
 
 // ── AUTH ─────────────────────────────────────────────────────────────────────
 
-async function verificarAdmin(userId) {
-  const { data } = await supabase.from('usuarios').select('tipo,status').eq('id', userId).single();
+const ADMIN_EMAIL = 'marciooillesc@gmail.com';
+
+async function verificarAdmin(user) {
+  // Admin hardcoded por e-mail — não depende de RLS ou tabela usuarios
+  if (user?.email === ADMIN_EMAIL) return true;
+  // Fallback: verifica tabela para outros admins futuros
+  const { data } = await supabase.from('usuarios').select('tipo,status').eq('id', user.id).single();
   return data?.tipo === 'admin' && data?.status === 'aprovado';
 }
 
 async function iniciar() {
   const { data: sessao } = await supabase.auth.getSession();
   if (sessao?.session?.user) {
-    const ok = await verificarAdmin(sessao.session.user.id);
+    const ok = await verificarAdmin(sessao.session.user);
     if (ok) { mostrarApp(); return; }
   }
   document.getElementById('tela-login').style.display = 'flex';
@@ -533,7 +538,7 @@ document.getElementById('btn-login').addEventListener('click', async () => {
     return;
   }
 
-  const ok = await verificarAdmin(data.user.id);
+  const ok = await verificarAdmin(data.user);
   if (!ok) {
     erroEl.textContent = 'Acesso negado. Apenas administradores podem entrar aqui.';
     erroEl.classList.remove('oculto');
