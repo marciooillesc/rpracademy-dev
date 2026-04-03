@@ -26,7 +26,7 @@ import { getEstado } from './state.js';
 export async function gerarTokenCheckIn(data) {
   const usuario = getEstado().usuario;
 
-  if (!usuario || usuario.tipo !== 'professor') {
+  if (!usuario || !(usuario.tipo === 'professor' || usuario.isProfessor || usuario.tipo === 'admin')) {
     return { erro: 'Apenas professores podem gerar token' };
   }
 
@@ -135,7 +135,7 @@ export async function confirmarPresencaComToken() {
 export async function obterPresencaDia(data) {
   const usuario = getEstado().usuario;
 
-  if (!usuario || usuario.tipo !== 'professor') {
+  if (!usuario || !(usuario.tipo === 'professor' || usuario.isProfessor || usuario.tipo === 'admin')) {
     return { erro: 'Acesso restrito a professores' };
   }
 
